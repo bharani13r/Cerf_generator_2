@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Certificate Generator</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-content">
+    <div class="brand-icon">✦</div>
+    <p class="eyebrow">AUTOMATED DOCUMENT WORKFLOW</p>
+    <h1>Digital Certificate Generator</h1>
+    <p class="hero-description">
+      Create personalized certificates from your spreadsheet in just a few clicks.
+    </p>
+    <div class="hero-tags">
+      <span>Excel import</span>
+      <span>Custom positioning</span>
+      <span>PDF export</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">YOUR WORKSPACE</p>
+      <h2>Certificate studio</h2>
+      <p class="muted">Follow the three steps below to create your certificates.</p>
+    </div>
+    <div class="limit-badge">Maximum 5 participants</div>
+  </div>
+
+  <div class="steps">
+    <div class="step active"><span>01</span><div><b>Import</b><small>Participant data</small></div></div>
+    <div class="step"><span>02</span><div><b>Design</b><small>Place certificate fields</small></div></div>
+    <div class="step"><span>03</span><div><b>Export</b><small>Download PDFs</small></div></div>
+  </div>
+
+  <section class="card">
+    <div class="section-heading">
+      <div class="section-icon">01</div>
+      <div>
+        <h2>Import participants</h2>
+        <p>Upload your Excel file containing the participant details.</p>
+      </div>
+    </div>
+
+    <div class="upload-box">
+      <div class="upload-symbol">↥</div>
+      <label for="excelFile">Choose Excel spreadsheet</label>
+      <p>Supported formats: .xlsx and .xls</p>
+      <input id="excelFile" type="file" accept=".xlsx,.xls">
+      <button id="readBtn" type="button">Read spreadsheet <span>→</span></button>
+    </div>
+
+    <div class="required-columns">
+      <strong>Required column headings</strong>
+      <div class="column-tags">
+        <span>Name</span><span>Event</span><span>Date</span>
+        <span>Email</span><span>Position</span>
+      </div>
+      <p class="hint">Column headings are not case-sensitive. Keep all five columns in your first worksheet.</p>
+    </div>
+
+    <p id="excelStatus" class="status" role="status"></p>
+    <div id="participantsTable" class="table-wrap"></div>
+  </section>
+
+  <section class="card">
+    <div class="section-heading">
+      <div class="section-icon">02</div>
+      <div>
+        <h2>Design your certificate</h2>
+        <p>Upload each template and click where its text should appear.</p>
+      </div>
+    </div>
+
+    <div class="template-selector">
+      <div>
+        <label for="templateType">Template you want to edit</label>
+        <select id="templateType">
+          <option value="winner">Winner certificate (1st, 2nd, 3rd)</option>
+          <option value="participant">Participation certificate (others)</option>
+        </select>
+      </div>
+      <div class="template-tip">
+        <strong>Tip</strong>
+        <p>Position fields separately for each template. Their settings are saved independently.</p>
+      </div>
+    </div>
+
+    <div class="upload-inline">
+      <div>
+        <label for="templateFile">Upload certificate image</label>
+        <p class="hint">JPG, JPEG or PNG image</p>
+      </div>
+      <input id="templateFile" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png">
+    </div>
+    <p id="templateStatus" class="status">Upload the selected template image.</p>
+
+    <div class="editor">
+      <aside class="toolbar">
+        <h3>Text settings</h3>
+
+        <label for="fieldSelect">Field to position</label>
+        <select id="fieldSelect">
+          <option value="Name">Participant name</option>
+          <option value="Event">Event</option>
+          <option value="Date">Date</option>
+          <option value="Position">Position</option>
+        </select>
+
+        <label for="fontSize">Font size (points)</label>
+        <input id="fontSize" type="number" min="6" max="72" value="24">
+
+        <label for="fontSelect">Font family</label>
+        <select id="fontSelect">
+          <option value="helvetica">Helvetica</option>
+          <option value="times">Times</option>
+          <option value="courier">Courier</option>
+        </select>
+
+        <label class="check-row">
+          <input id="boldText" type="checkbox"> Bold text
+        </label>
+
+        <label for="textColor">Text color</label>
+        <input id="textColor" type="color" value="#111111">
+
+        <button id="placeModeBtn" class="primary-btn" type="button">Place selected field</button>
+        <p class="hint">Click the button, then click the desired location on your certificate.</p>
+
+        <button id="clearFieldBtn" class="secondary-btn" type="button">Clear selected field</button>
+        <button id="clearAllBtn" class="secondary-btn" type="button">Clear all positions</button>
+
+        <p id="editorStatus" class="status" role="status">
+          Choose a field and click Place selected field.
+        </p>
+
+        <div id="positionList" class="position-list"></div>
+      </aside>
+
+      <div class="canvasArea">
+        <div class="canvas-heading">
+          <strong>Template preview</strong>
+          <span>Click to place text</span>
+        </div>
+        <div id="canvasViewport">
+          <div id="canvasWrap">
+            <p id="emptyMessage">Your certificate preview will appear here after you upload a template.</p>
+            <canvas id="templateCanvas"></canvas>
+            <div id="markers"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-heading">
+      <div class="section-icon">03</div>
+      <div>
+        <h2>Generate certificates</h2>
+        <p>Preview your design, generate individual PDFs and download them together.</p>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button id="previewBtn" class="secondary-btn" type="button">Preview first participant</button>
+      <button id="generateBtn" class="primary-btn" type="button">Generate PDFs →</button>
+    </div>
+
+    <p id="generateStatus" class="status" role="status"></p>
+    <div id="pdfPreview"></div>
+    <div id="downloads"></div>
+
+    <div class="zip-row">
+      <div>
+        <strong>All certificates in one file</strong>
+        <p class="hint">Download every generated PDF together in a ZIP archive.</p>
+      </div>
+      <button id="zipBtn" class="dark-btn" type="button" disabled>Download ZIP</button>
+    </div>
+  </section>
+
+  <div class="security-note">
+    <strong>Privacy note</strong>
+    <p>Your spreadsheet and certificate images are processed in your browser. This version downloads PDFs and a ZIP file; it does not send participant emails.</p>
+  </div>
+</main>
+
+<footer>Digital Certificate Generator <span>·</span> Created for simple certificate workflows</footer>
+<script src="script.js"></script>
+</body>
+</html>
